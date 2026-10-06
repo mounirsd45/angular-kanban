@@ -1,0 +1,71 @@
+<header class="header">
+  <button
+    type="button"
+    class="icon-btn mobile-only"
+    aria-label="Open menu"
+    (click)="ui.setSidebarOpen(true)"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h12" /></svg>
+  </button>
+
+  @if (editing()) {
+    <input
+      class="title-input"
+      aria-label="Board title"
+      [value]="board.title()"
+      maxlength="80"
+      autofocus
+      (blur)="commitTitle($event)"
+      (keydown.enter)="$any($event.target).blur()"
+      (keydown.escape)="cancelEdit()"
+    />
+  } @else {
+    <h1>
+      <button type="button" class="title-btn" (click)="startEdit()">{{ board.title() }}</button>
+    </h1>
+  }
+
+  <button
+    type="button"
+    class="icon-btn"
+    [class.is-on]="board.favorite()"
+    [attr.aria-pressed]="board.favorite()"
+    aria-label="Favorite board"
+    (click)="board.toggleFavorite()"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.7 19.7 7.8 13.6 3.3 9.4l6.1-.8L12 3Z" /></svg>
+  </button>
+
+  <span class="spacer"></span>
+
+  <a class="text-link" href="https://github.com/mounirsd45/angular-kanban" target="_blank" rel="noreferrer">Source</a>
+
+  <button type="button" class="ghost" (click)="ui.openDialog({ type: 'invite' })">Invite</button>
+
+  <div class="pop">
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Activity"
+      [attr.aria-expanded]="notesOpen()"
+      (click)="toggleNotes()"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" /><path d="M10 19a2 2 0 0 0 4 0" /></svg>
+      @if (unseen() > 0) {
+        <span class="badge">{{ unseen() }}</span>
+      }
+    </button>
+    @if (notesOpen()) {
+      <div class="popover notes" role="region" aria-label="Recent activity">
+        @for (item of board.activity(); track item.id) {
+          <p [class.is-new]="isNew(item.at)">
+            <span>{{ item.text }}</span>
+            <time>{{ relativeTime(item.at) }}</time>
+          </p>
+        } @empty {
+          <p class="muted">No activity yet.</p>
+        }
+      </div>
+    }
+  </div>
+</header>

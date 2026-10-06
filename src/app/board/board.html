@@ -1,0 +1,113 @@
+@if (filtered()) {
+  <p class="drag-note">Drag and drop is paused while a search or filter is active.</p>
+}
+
+@if (board.hiddenColumns().length > 0) {
+  <div class="hidden-bar">
+    <span>Hidden</span>
+    @for (column of board.hiddenColumns(); track column.id) {
+      <button type="button" (click)="board.setColumnHidden(column.id, false)">{{ column.name }}</button>
+    }
+    <button type="button" (click)="board.showAllColumns()">Show all</button>
+  </div>
+}
+
+@if (board.visibleColumns().length === 0) {
+  <div class="scroll-pane empty-board">
+    <h2>Every column is hidden</h2>
+    <button type="button" class="solid" (click)="board.showAllColumns()">Show all columns</button>
+  </div>
+} @else {
+  <div class="columns" cdkDropListGroup>
+    @for (column of board.visibleColumns(); track column.id) {
+      <section class="column">
+        <header class="column-head">
+          @if (renamingId() === column.id) {
+            <input
+              class="rename"
+              [value]="column.name"
+              aria-label="Column name"
+              autofocus
+              (blur)="commitRename(column.id, $event)"
+              (keydown.enter)="$any($event.target).blur()"
+              (keydown.escape)="renamingId.set(null)"
+            />
+          } @else {
+            <h2>{{ column.name }}</h2>
+          }
+          <span class="count">{{ tasksFor(column.id).length }}</span>
+          <div class="pop">
+            <button
+              type="button"
+              class="icon-btn"
+              aria-label="Column actions"
+              [attr.aria-expanded]="menuId() === column.id"
+              (click)="toggleMenu(column.id)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h.01M12 12h.01M18 12h.01" /></svg>
+            </button>
+            @if (menuId() === column.id) {
+              <div class="popover menu">
+                <button type="button" (click)="sort(column.id, 'priority')">Sort by priority</button>
+                <button type="button" (click)="sort(column.id, 'due')">Sort by due date</button>
+                <button type="button" (click)="startRename(column.id)">Rename</button>
+                <button type="button" (click)="hide(column.id)">Hide column</button>
+              </div>
+            }
+          </div>
+        </header>
+
+        <div
+          class="column-body"
+          cdkDropList
+          [id]="column.id"
+          [cdkDropListData]="tasksFor(column.id)"
+          (cdkDropListDropped)="drop($event)"
+        >
+          @for (task of tasksFor(column.id); track task.id) {
+            <article class="card" cdkDrag [cdkDragDisabled]="filtered()" [cdkDragData]="task">
+              <div class="placeholder" *cdkDragPlaceholder></div>
+              <button type="button" class="grip" cdkDragHandle aria-label="Drag task">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7h.01M15 7h.01M9 12h.01M15 12h.01M9 17h.01M15 17h.01" /></svg>
+              </button>
+              <button type="button" class="card-open" (click)="open(task)">
+                <strong>{{ task.title }}</strong>
+                <span class="chips">
+                  @if (ui.display().priority) {
+                    <span class="chip" [attr.data-priority]="task.priority">{{ priorityLabel(task.priority) }}</span>
+                  }
+                  @if (ui.display().due && task.dueDate) {
+                    <span class="chip" [class.is-late]="overdue(task)">Due {{ formatDay(task.dueDate) }}</span>
+                  }
+                  @if (ui.display().created) {
+                    <span class="chip">Added {{ formatCreated(task.createdAt) }}</span>
+                  }
+                </span>
+                @if (ui.display().assignees && task.assigneeIds.length > 0) {
+                  <span class="faces">
+                    @for (id of task.assigneeIds; track id) {
+                      <span class="avatar sm" [style.background]="avatarColor(id)" [attr.title]="board.memberName(id)">{{ initials(board.memberName(id)) }}</span>
+                    }
+                  </span>
+                }
+              </button>
+            </article>
+          }
+          @if (tasksFor(column.id).length === 0) {
+            <p class="empty-col">{{ filtered() ? 'No matching tasks' : 'Drop a task here' }}</p>
+          }
+        </div>
+
+        <form class="composer" (submit)="addQuick(column.id, $event)">
+          <input
+            [value]="draftFor(column.id)"
+            placeholder="New task"
+            aria-label="New task in {{ column.name }}"
+            (input)="setDraft(column.id, $event)"
+          />
+          <button type="submit">Add</button>
+        </form>
+      </section>
+    }
+  </div>
+}

@@ -1,0 +1,127 @@
+@if (ui.dialog(); as dialog) {
+  <div class="dialog-backdrop" (click)="ui.closeDialog()">
+    <div
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button type="button" class="icon-btn dialog-close" aria-label="Close" (click)="ui.closeDialog()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+
+      @switch (dialog.type) {
+        @case ('help') {
+          <h2 id="dialog-title">Shortcuts</h2>
+          <p class="muted">Field notes stays in this browser. Nothing is sent to a server.</p>
+          <ul class="keys">
+            <li><kbd>/</kbd> Search tasks</li>
+            <li><kbd>n</kbd> New task</li>
+            <li><kbd>?</kbd> This help</li>
+            <li><kbd>[</kbd> Collapse the sidebar</li>
+            <li><kbd>Esc</kbd> Close a dialog</li>
+          </ul>
+        }
+        @case ('invite') {
+          <h2 id="dialog-title">Invite someone</h2>
+          <form (submit)="$event.preventDefault(); invite()">
+            <label>
+              Name
+              <input [value]="inviteName()" autofocus (input)="onInvite($event)" />
+            </label>
+            <div class="dialog-actions">
+              <button type="button" class="ghost" (click)="ui.closeDialog()">Cancel</button>
+              <button type="submit" class="solid">Add to team</button>
+            </div>
+          </form>
+        }
+        @case ('import') {
+          <h2 id="dialog-title">Import tasks</h2>
+          <form (submit)="$event.preventDefault(); importTasks()">
+            <label>
+              Column
+              <select (change)="onImportColumn($event)">
+                @for (column of board.columns(); track column.id) {
+                  <option [value]="column.id" [selected]="column.id === importColumnId()">{{ column.name }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Titles, one per line
+              <textarea rows="6" [value]="importText()" autofocus (input)="onImportText($event)"></textarea>
+            </label>
+            <div class="dialog-actions">
+              <button type="button" class="ghost" (click)="ui.closeDialog()">Cancel</button>
+              <button type="submit" class="solid">Import</button>
+            </div>
+          </form>
+        }
+        @default {
+          @if (draft(); as task) {
+            <h2 id="dialog-title">{{ dialog.type === 'new-task' ? 'New task' : 'Edit task' }}</h2>
+            <form (submit)="$event.preventDefault(); saveTask()">
+              <label>
+                Title
+                <input [value]="task.title" autofocus (input)="onTitle($event)" />
+              </label>
+              <label>
+                Description
+                <textarea rows="4" [value]="task.description" (input)="onDescription($event)"></textarea>
+              </label>
+              <div class="split">
+                <label>
+                  Column
+                  <select (change)="onColumn($event)">
+                    @for (column of board.columns(); track column.id) {
+                      <option [value]="column.id" [selected]="column.id === task.columnId">{{ column.name }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  Priority
+                  <select (change)="onPriority($event)">
+                    @for (priority of priorities; track priority.id) {
+                      <option [value]="priority.id" [selected]="priority.id === task.priority">{{ priority.label }}</option>
+                    }
+                  </select>
+                </label>
+              </div>
+              <label>
+                Due date
+                <input type="date" [value]="task.dueDate" (input)="onDue($event)" />
+              </label>
+              <fieldset>
+                <legend>Assignees</legend>
+                <div class="assignees">
+                  @for (member of board.members(); track member.id) {
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.is-on]="task.assigneeIds.includes(member.id)"
+                      [attr.aria-pressed]="task.assigneeIds.includes(member.id)"
+                      (click)="toggleAssignee(member.id)"
+                    >
+                      {{ member.name }}
+                    </button>
+                  }
+                </div>
+              </fieldset>
+              <div class="dialog-actions">
+                @if (dialog.type === 'task') {
+                  <button type="button" class="danger" (click)="removeTask()">Delete</button>
+                }
+                <span class="spacer"></span>
+                <button type="button" class="ghost" (click)="ui.closeDialog()">Cancel</button>
+                <button type="submit" class="solid">Save</button>
+              </div>
+            </form>
+          } @else {
+            <h2 id="dialog-title">Task missing</h2>
+            <p>That task is no longer on the board.</p>
+          }
+        }
+      }
+    </div>
+  </div>
+}

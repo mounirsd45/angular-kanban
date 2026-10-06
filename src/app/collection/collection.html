@@ -1,0 +1,36 @@
+<section class="collection">
+  <h2>{{ heading() }}</h2>
+
+  @if (mode() === 'empty') {
+    <p class="muted">This section is a placeholder in the demo. Team issues is where the board lives.</p>
+    <button type="button" class="solid" (click)="ui.setNav('team-issues')">Open team issues</button>
+  } @else {
+    <ul class="issue-list">
+      @for (task of tasks(); track task.id) {
+        <li>
+          <button type="button" (click)="open(task)">
+            <strong>{{ task.title }}</strong>
+            <span class="chips">
+              <span class="chip">{{ board.columnName(task.columnId) }}</span>
+              <span class="chip" [attr.data-priority]="task.priority">{{ priorityLabel(task.priority) }}</span>
+              @if (task.dueDate) {
+                <span class="chip" [class.is-late]="overdue(task)">Due {{ formatDay(task.dueDate) }}</span>
+              }
+            </span>
+            @if (task.assigneeIds.length > 0) {
+              <span class="faces">
+                @for (id of task.assigneeIds; track id) {
+                  <span class="avatar sm" [style.background]="avatarColor(id)">{{ initials(board.memberName(id)) }}</span>
+                }
+              </span>
+            }
+          </button>
+        </li>
+      } @empty {
+        <li class="muted">
+          {{ mode() === 'inbox' ? 'Inbox is clear. Nothing is overdue or unassigned.' : 'Nothing is assigned to you yet.' }}
+        </li>
+      }
+    </ul>
+  }
+</section>

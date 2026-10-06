@@ -1,0 +1,66 @@
+<div class="toolbar">
+  <div class="tabs" role="tablist" aria-label="Board sections">
+    <button type="button" role="tab" [attr.aria-selected]="ui.tab() === 'overview'" [class.is-active]="ui.tab() === 'overview'" (click)="ui.setTab('overview')">Overview</button>
+    <button type="button" role="tab" [attr.aria-selected]="ui.tab() === 'updates'" [class.is-active]="ui.tab() === 'updates'" (click)="ui.setTab('updates')">Updates</button>
+    <button type="button" role="tab" [attr.aria-selected]="ui.tab() === 'issues'" [class.is-active]="ui.tab() === 'issues'" (click)="ui.setTab('issues')">Issues</button>
+  </div>
+
+  <label class="search">
+    <span class="sr-only">Search tasks</span>
+    <input
+      id="board-search"
+      type="search"
+      placeholder="Search tasks"
+      [value]="ui.search()"
+      (input)="onSearch($event)"
+    />
+  </label>
+
+  <div class="pop">
+    <button type="button" class="ghost" [class.is-on]="isFilterActive(ui.filter())" (click)="toggleFilter()">Filter</button>
+    @if (filterOpen()) {
+      <div class="popover">
+        <label>
+          Priority
+          <select (change)="ui.setFilter({ priority: $any($event.target).value || null })">
+            <option value="" [selected]="!ui.filter().priority">Any</option>
+            @for (priority of priorities; track priority.id) {
+              <option [value]="priority.id" [selected]="ui.filter().priority === priority.id">{{ priority.label }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Assignee
+          <select (change)="ui.setFilter({ assigneeId: $any($event.target).value || null })">
+            <option value="" [selected]="!ui.filter().assigneeId">Anyone</option>
+            @for (member of board.members(); track member.id) {
+              <option [value]="member.id" [selected]="ui.filter().assigneeId === member.id">{{ member.name }}</option>
+            }
+          </select>
+        </label>
+        <label class="check">
+          <input type="checkbox" [checked]="ui.filter().overdue" (change)="ui.setFilter({ overdue: $any($event.target).checked })" />
+          Overdue only
+        </label>
+        <button type="button" class="text-btn" (click)="ui.clearFilter()">Clear filters</button>
+      </div>
+    }
+  </div>
+
+  <div class="pop">
+    <button type="button" class="ghost" (click)="toggleDisplay()">Fields</button>
+    @if (displayOpen()) {
+      <div class="popover">
+        @for (option of displayOptions; track option.key) {
+          <label class="check">
+            <input type="checkbox" [checked]="ui.display()[option.key]" (change)="setDisplay(option.key, $event)" />
+            {{ option.label }}
+          </label>
+        }
+      </div>
+    }
+  </div>
+
+  <button type="button" class="ghost" (click)="ui.openDialog({ type: 'import' })">Import</button>
+  <button type="button" class="solid" (click)="ui.openDialog({ type: 'new-task' })">New task</button>
+</div>

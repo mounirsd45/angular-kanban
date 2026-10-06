@@ -1,0 +1,13 @@
+<section class="updates">
+  <h2>Updates</h2>
+  <ol>
+    @for (item of items(); track item.id) {
+      <li>
+        <p>{{ item.text }}</p>
+        <time>{{ relativeTime(item.at) }}</time>
+      </li>
+    } @empty {
+      <li class="muted">No matching updates.</li>
+    }
+  </ol>
+</section>

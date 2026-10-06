@@ -1,0 +1,38 @@
+<div class="app" [class.is-collapsed]="ui.sidebarCollapsed()" [class.nav-open]="ui.sidebarOpen()">
+  <app-sidebar />
+  @if (ui.sidebarOpen()) {
+    <button type="button" class="scrim" aria-label="Close menu" (click)="ui.setSidebarOpen(false)"></button>
+  }
+  <div class="workspace">
+    <app-header />
+    <main class="main" id="main">
+      @switch (ui.nav()) {
+        @case ('inbox') {
+          <app-collection mode="inbox" />
+        }
+        @case ('my-issues') {
+          <app-collection mode="mine" />
+        }
+        @case ('team-issues') {
+          <app-toolbar />
+          @switch (ui.tab()) {
+            @case ('overview') {
+              <app-overview />
+            }
+            @case ('updates') {
+              <app-updates />
+            }
+            @case ('issues') {
+              <app-board />
+            }
+          }
+        }
+        @default {
+          <app-collection mode="empty" />
+        }
+      }
+    </main>
+  </div>
+</div>
+<app-dialogs />
+<app-toasts />

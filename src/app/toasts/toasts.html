@@ -1,0 +1,5 @@
+<div class="toasts" aria-live="polite">
+  @for (toast of ui.toasts(); track toast.id) {
+    <button type="button" class="toast" (click)="ui.dismissToast(toast.id)">{{ toast.title }}</button>
+  }
+</div>

@@ -1,0 +1,45 @@
+<section class="overview">
+  <div class="stats">
+    <article><strong>{{ stats().open }}</strong><span>Open</span></article>
+    <article><strong>{{ stats().overdue }}</strong><span>Overdue</span></article>
+    <article><strong>{{ stats().done }}</strong><span>Shipped</span></article>
+    <article><strong>{{ stats().members }}</strong><span>People</span></article>
+  </div>
+
+  <section>
+    <h2>Columns</h2>
+    <ul class="bars">
+      @for (column of stats().columns; track column.id) {
+        <li>
+          <span>{{ column.name }}</span>
+          <span class="bar"><span [style.width.%]="column.width"></span></span>
+          <b>{{ column.count }}</b>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section>
+    <h2>Priority</h2>
+    <ul class="bars">
+      @for (priority of stats().priorities; track priority.id) {
+        <li>
+          <span class="chip" [attr.data-priority]="priority.id">{{ priority.label }}</span>
+          <b>{{ priority.count }}</b>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section>
+    <h2>Open work by person</h2>
+    <ul class="bars">
+      @for (member of stats().workload; track member.id) {
+        <li>
+          <span>{{ member.name }}</span>
+          <b>{{ member.count }}</b>
+        </li>
+      }
+    </ul>
+  </section>
+</section>
